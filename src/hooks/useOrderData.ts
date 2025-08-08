@@ -23,7 +23,6 @@ const useOrderData = () => {
   } = useQuery({
     queryKey: ['discount'],
     queryFn: fetchDiscount,
-    initialData: null,
   })
 
   const {
@@ -33,7 +32,6 @@ const useOrderData = () => {
   } = useQuery({
     queryKey: ['payment'],
     queryFn: fetchPayment,
-    initialData: null,
   })
 
   const { mutate: orderSubmitMutate, isPending: isSubmitting } = useMutation({

@@ -97,7 +97,7 @@ const OrderForm = ({ orderType }: OrderFormProps) => {
         receiver: formValues.receiver,
         product: [selectedProduct],
         payment: payment!,
-        discount: discount,
+        discount: discount!,
       };
 
       switch (formValues.orderType) {
@@ -160,11 +160,11 @@ const OrderForm = ({ orderType }: OrderFormProps) => {
         register={register} 
         error={errors.productId} 
       />
-      <DiscountInfo discount={discount} />
+      <DiscountInfo data={discount || null} />
       <PaymentInfo 
         data={payment || null} 
         selectedProduct={selectedProduct} 
-        discount={discount} 
+        discount={discount || null} 
         register={register} 
         error={errors.paymentId} 
       />
