@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { mockProducts, mockDiscount, mockPayment } from '@/components/features/order/mock/data';
+import { mockProducts, mockDiscount, mockPayment, mockAddresses } from '@/components/features/order/mock/data';
+import { Address } from '@/lib/types/address.types';
 
 
 /*
@@ -47,7 +48,8 @@ export async function GET(request: Request, { params }: { params: { slug: string
   const [slug] = await params.slug;
 
   await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-  console.log("slug", slug)
+  console.log("GET slug", slug)
+
   switch (slug) {
     case 'products':
       return NextResponse.json(mockProducts);
@@ -55,6 +57,21 @@ export async function GET(request: Request, { params }: { params: { slug: string
       return NextResponse.json(mockDiscount);
     case 'payment':
       return NextResponse.json(mockPayment);
+    case 'addresses':
+      const { searchParams } = new URL(request.url);
+      const page = parseInt(searchParams.get('page') || '1');
+      const pageSize = parseInt(searchParams.get('pageSize') || '5');
+
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+      const paginatedAddresses = mockAddresses.slice(start, end);
+
+      return NextResponse.json({
+        data: paginatedAddresses,
+        total: mockAddresses.length,
+        page,
+        pageSize,
+      });
     default:
       return new NextResponse('Not Found', { status: 404 });
   }
@@ -63,21 +80,85 @@ export async function GET(request: Request, { params }: { params: { slug: string
 export async function POST(request: Request, { params }: { params: { slug: string[] } }) {
     const [slug] = await params.slug;
 
-    if (slug !== 'submit') {
+    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+    console.log("POST slug", slug)
+
+    switch (slug) {
+      case 'submit':
+        try {
+            const orderData = await request.json();
+            console.log("Received order data:", orderData);
+
+            // Simulate order processing
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const orderId = `ORDER_${Date.now()}`;
+            return NextResponse.json({ orderId });
+
+        } catch (error) {
+            return new NextResponse('Invalid request body', { status: 400 });
+        }
+      case 'addresses':
+        try {
+          const newAddress: Address = await request.json();
+          const id = `addr-${mockAddresses.length + 1}`;
+          const addressWithId = { ...newAddress, id };
+          mockAddresses.push(addressWithId);
+          return NextResponse.json(addressWithId, { status: 201 });
+        } catch (error) {
+          console.error('Failed to add address:', error);
+          return new NextResponse('Invalid address data', { status: 400 });
+        }
+      default:
         return new NextResponse('Not Found', { status: 404 });
     }
+}
 
-    try {
-        const orderData = await request.json();
-        console.log("Received order data:", orderData);
+export async function PUT(request: Request, { params }: { params: { slug: string[] } }) {
+  const [slug, id] = await params.slug;
 
-        // Simulate order processing
-        await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+  console.log("PUT slug", slug, "id", id)
 
-        const orderId = `ORDER_${Date.now()}`;
-        return NextResponse.json({ orderId });
+  if (slug !== 'addresses' || !id) {
+    return new NextResponse('Not Found', { status: 404 });
+  }
 
-    } catch (error) {
-        return new NextResponse('Invalid request body', { status: 400 });
+  try {
+    const updatedAddressData: Address = await request.json();
+    const index = mockAddresses.findIndex(addr => addr.id === id);
+
+    if (index === -1) {
+      return new NextResponse('Address not found', { status: 404 });
     }
+
+    mockAddresses[index] = { ...mockAddresses[index], ...updatedAddressData, id }; // ID 유지
+    return NextResponse.json(mockAddresses[index]);
+  } catch (error) {
+    console.error('Failed to update address:', error);
+    return new NextResponse('Invalid address data', { status: 400 });
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: { slug: string[] } }) {
+  const [slug, id] = await params.slug;
+
+  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+  console.log("DELETE slug", slug, "id", id)
+
+  if (slug !== 'addresses' || !id) {
+    return new NextResponse('Not Found', { status: 404 });
+  }
+
+  const initialLength = mockAddresses.length;
+  const filteredAddresses = mockAddresses.filter(addr => addr.id !== id);
+
+  if (filteredAddresses.length === initialLength) {
+    return new NextResponse('Address not found', { status: 404 });
+  }
+
+  // 실제 배열을 수정 (mockAddresses = filteredAddresses; 대신 splice 사용)
+  mockAddresses.splice(0, mockAddresses.length, ...filteredAddresses);
+
+  return new NextResponse(null, { status: 204 });
 }

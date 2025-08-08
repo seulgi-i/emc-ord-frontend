@@ -1,17 +1,18 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { UseFormRegister, FieldErrors, Control, useWatch, useForm } from 'react-hook-form'
 import { OrderFormValues, OrderType, OrderPayload } from '@/components/features/order/order.types'
 import useOrderData from '@/hooks/useOrderData'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import InputField from '@/components/ui/InputField'
-import PaymentInfo from './PaymentInfo'
-import DiscountInfo from './DiscountInfo'
-import ProductInfo from './ProductInfo'
 import router from 'next/router'
 import { orderFormSchema, orderPayloadSchema } from '@/lib/schemas/order.schemas'
+import AddressListModal from './AddressListModal' // Import the new modal
+import ProductInfo from './ProductInfo'
+import DiscountInfo from './DiscountInfo'
+import PaymentInfo from './PaymentInfo'
 
 interface FormComponentProps {
   register: UseFormRegister<OrderFormValues>
@@ -29,6 +30,16 @@ const CommonFields = ({ register, errors }: Pick<FormComponentProps, 'register' 
 )
 
 const DynamicFields = ({ register, errors, orderType }: FormComponentProps) => {
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+
+  const handleOpenAddressModal = () => {
+    setIsAddressModalOpen(true);
+  };
+
+  const handleCloseAddressModal = () => {
+    setIsAddressModalOpen(false);
+  };
+
   return (
     <section className="p-4 border rounded-lg space-y-4">
       <h2 className="text-xl font-semibold">배송지 정보</h2>
@@ -39,6 +50,18 @@ const DynamicFields = ({ register, errors, orderType }: FormComponentProps) => {
       {orderType === 'O' && (
         <InputField<OrderFormValues> id="customsId" label="개인통관고유부호" register={register} error={errors} />
       )}
+      <button
+        type="button"
+        onClick={handleOpenAddressModal}
+        className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+      >
+        배송지 관리
+      </button>
+
+      <AddressListModal
+        isOpen={isAddressModalOpen}
+        onClose={handleCloseAddressModal}
+      />
     </section>
   )
 }
