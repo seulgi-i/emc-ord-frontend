@@ -2,16 +2,22 @@
 
 import React from 'react';
 import { UseFormRegister, FieldError } from 'react-hook-form';
-import { Payment, OrderFormValues } from '@/features/order/order.types';
+import { Discount, OrderFormValues, Payment, Product } from '../order.types';
 
 interface PaymentInfoProps {
-  payment: Payment | null;
+  data: Payment | null;
+  selectedProduct: Product | undefined;
+  discount: Discount | null;
   register: UseFormRegister<OrderFormValues>;
   error?: FieldError;
 }
 
-const PaymentInfo: React.FC<PaymentInfoProps> = ({ payment, register, error }) => {
-  if (!payment) return null;
+const PaymentInfo: React.FC<PaymentInfoProps> = ({ data, selectedProduct, discount, register, error }) => {
+  if (!data) return null;
+
+  const totalProductAmount = selectedProduct ? selectedProduct.price : 0;
+  const discountAmount = discount && totalProductAmount > 0 ? totalProductAmount * discount.rate : 0;
+  const finalPaymentAmount = totalProductAmount - discountAmount;
 
   return (
     <section className="p-4 border rounded-lg">
@@ -19,12 +25,17 @@ const PaymentInfo: React.FC<PaymentInfoProps> = ({ payment, register, error }) =
       <div className="space-y-2">
         <div className="flex justify-between">
           <span>총 상품금액</span>
-          <span>{payment.amount.toLocaleString()}원</span>
+          <span>{totalProductAmount.toLocaleString()}원</span>
         </div>
-        {/* 할인 금액 등 추가 정보가 있다면 여기에 표시 */}
+        {discount && discountAmount > 0 && (
+          <div className="flex justify-between text-red-500">
+            <span>{discount.name} ({discount.rate * 100}%)</span>
+            <span>-{discountAmount.toLocaleString()}원</span>
+          </div>
+        )}
         <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
           <span>최종 결제금액</span>
-          <span>{payment.amount.toLocaleString()}원</span>
+          <span>{finalPaymentAmount.toLocaleString()}원</span>
         </div>
       </div>
 
@@ -33,11 +44,11 @@ const PaymentInfo: React.FC<PaymentInfoProps> = ({ payment, register, error }) =
         <label className="flex items-center p-2 border rounded-md hover:bg-gray-50">
           <input 
             type="radio" 
-            value={payment.id} 
+            value={data.id} 
             {...register('paymentId')} 
             className="mr-4"
           />
-          <span>{payment.method}</span>
+          <span>{data.method}</span>
         </label>
         {error && <p className="text-red-500 mt-2">{error.message}</p>}
       </div>

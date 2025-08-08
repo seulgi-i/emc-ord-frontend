@@ -2,20 +2,20 @@
 
 import React from 'react';
 import { UseFormRegister, FieldError } from 'react-hook-form';
-import { Product, OrderFormValues } from '@/features/order/order.types';
+import { OrderFormValues, Product } from '../order.types';
 
 interface ProductInfoProps {
-  products: Product[];
+  data: Product[];
   register: UseFormRegister<OrderFormValues>;
   error?: FieldError;
 }
 
-const ProductInfo: React.FC<ProductInfoProps> = ({ products, register, error }) => {
+const ProductInfo: React.FC<ProductInfoProps> = ({ data, register, error }) => {
   return (
     <section className="p-4 border rounded-lg">
       <h2 className="text-xl font-semibold mb-2">주문 상품 정보</h2>
       <div className="space-y-2">
-        {products.map((product) => (
+        {data.map((product) => (
           <label key={product.id} className="flex items-center p-2 border rounded-md hover:bg-gray-50">
             <input
               type="radio"

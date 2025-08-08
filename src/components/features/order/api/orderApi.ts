@@ -1,15 +1,10 @@
-import apiClient from '@/lib/apiClient';
-import { OrderPayload } from '@/features/order/order.types';
-import {
-  productListSchema,
-  discountSchema,
-  paymentSchema,
-} from '@/features/order/order.schemas';
-import { Product, Discount, Payment } from '@/features/order/order.types';
+import { discountSchema, paymentSchema, productListSchema } from "@/lib/schemas/order.schemas";
+import { Discount, OrderPayload, Payment, Product } from "../order.types";
+import apiClient from "@/lib/api/apiClient";
 
 // 상품 목록 조회 API
 export const fetchProducts = (): Promise<Product[]> => {
-  return apiClient('/api/order/products', {}, productListSchema);
+    return apiClient('/api/order/products', {}, productListSchema);
 };
 
 // 할인 정보 조회 API

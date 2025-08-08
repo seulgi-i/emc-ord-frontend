@@ -25,9 +25,12 @@ async function apiClient<T>(
       ...options.headers,
     },
   };
+  console.log("apiclient ==> url", url);
+  console.log("apiclient ==> mergedOptions", mergedOptions);
 
   try {
     const response = await fetch(url, mergedOptions);
+    console.log("apiclient ==> response", response)
 
     if (!response.ok) {
       // 서버에서 보낸 에러 메시지를 포함하여 예외를 던집니다.
@@ -47,6 +50,7 @@ async function apiClient<T>(
       }
       return validationResult.data;
     }
+    console.log("data", data);
 
     return data;
   } catch (error) {

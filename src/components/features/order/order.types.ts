@@ -1,12 +1,5 @@
+import { discountSchema, orderFormSchema, orderPayloadSchema, orderTypeSchema, paymentSchema, productSchema } from '@/lib/schemas/order.schemas';
 import { z } from 'zod';
-import {
-  productSchema,
-  discountSchema,
-  paymentSchema,
-  orderTypeSchema,
-  orderPayloadSchema,
-  orderFormSchema,
-} from './order.schemas';
 
 export type Product = z.infer<typeof productSchema>;
 export type Discount = z.infer<typeof discountSchema>;

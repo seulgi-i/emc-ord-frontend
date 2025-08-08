@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Discount } from '@/features/order/order.types';
+import { Discount } from '../order.types';
 
 interface DiscountInfoProps {
   discount: Discount | null;
