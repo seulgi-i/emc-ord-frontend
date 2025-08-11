@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import InputField from '@/components/ui/InputField';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addressSchema, AddressFormValues, Address } from '@/lib/schemas/address.schemas';
 import useAddresses from '@/hooks/useAddresses';
@@ -11,7 +11,7 @@ import useAddresses from '@/hooks/useAddresses';
 interface AddressEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  address?: Address | null; // null for add, Address object for edit
+  address?: Address | null;
 }
 
 const AddressEditModal: React.FC<AddressEditModalProps> = ({
@@ -33,7 +33,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
     },
   });
 
-  const { register, handleSubmit, formState: { errors }, reset } = methods;
+  const { control, register, handleSubmit, formState: { errors }, reset } = methods;
 
   useEffect(() => {
     if (address) {
@@ -96,11 +96,11 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <InputField<AddressFormValues> id="receiver" label="받는 분 이름" register={register} error={errors} />
-        <InputField<AddressFormValues> id="phone" label="휴대폰 번호" register={register} error={errors} />
-        <InputField<AddressFormValues> id="zipCode" label="우편번호" register={register} error={errors} />
-        <InputField<AddressFormValues> id="addr" label="주소" register={register} error={errors} />
-        
+        <InputField<AddressFormValues> id="receiver" label="받는 분 이름" control={control} />
+        <InputField<AddressFormValues> id="phone" label="휴대폰 번호" control={control} />
+        <InputField<AddressFormValues> id="zipCode" label="우편번호" control={control} />
+        <InputField<AddressFormValues> id="addr" label="주소" control={control} />
+
         <div className="flex items-center">
           <input
             type="checkbox"
