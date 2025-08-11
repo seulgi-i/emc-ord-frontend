@@ -7,13 +7,13 @@ import useOrderData from '@/hooks/useOrderData'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import InputField from '@/components/ui/InputField'
-import router from 'next/router'
+import { useRouter } from 'next/navigation' // Use next/navigation for App Router
 import { orderFormSchema, orderPayloadSchema } from '@/lib/schemas/order.schemas'
-import AddressListModal from './AddressListModal' // Import the new modal
+import AddressListModal from './AddressListModal'
 import ProductInfo from './ProductInfo'
 import DiscountInfo from './DiscountInfo'
 import PaymentInfo from './PaymentInfo'
-import { useGlobalUIStore } from '@/lib/stores/globalUIStore'
+
 
 interface FormComponentProps {
   register: UseFormRegister<OrderFormValues>
@@ -25,8 +25,8 @@ interface FormComponentProps {
 const CommonFields = ({ register, errors }: Pick<FormComponentProps, 'register' | 'errors'>) => (
   <section className="p-4 border rounded-lg space-y-4">
     <h2 className="text-xl font-semibold">주문자 정보</h2>
-    <InputField<OrderFormValues> id="orderCstNm" label="이름" register={register} error={errors} />
-    <InputField<OrderFormValues> id="orderMobilePhone" label="휴대폰 번호" register={register} error={errors} />
+    <InputField<OrderFormValues> id="orderCstNm" label="이름" register={register} error={errors.orderCstNm} />
+    <InputField<OrderFormValues> id="orderMobilePhone" label="휴대폰 번호" register={register} error={errors.orderMobilePhone} />
   </section>
 )
 
@@ -44,12 +44,12 @@ const DynamicFields = ({ register, errors, orderType }: FormComponentProps) => {
   return (
     <section className="p-4 border rounded-lg space-y-4">
       <h2 className="text-xl font-semibold">배송지 정보</h2>
-      <InputField<OrderFormValues> id="receiver" label="받으시는 분" register={register} error={errors} />
+      <InputField<OrderFormValues> id="receiver" label="받으시는 분" register={register} error={errors.receiver} />
       {orderType !== 'E' && (
-        <InputField<OrderFormValues> id="addr" label="주소" register={register} error={errors} />
+        <InputField<OrderFormValues> id="addr" label="주소" register={register} error={errors.addr} />
       )}
       {orderType === 'O' && (
-        <InputField<OrderFormValues> id="customsId" label="개인통관고유부호" register={register} error={errors} />
+        <InputField<OrderFormValues> id="customsId" label="개인통관고유부호" register={register} error={errors.customsId} />
       )}
       <button
         type="button"
@@ -72,9 +72,10 @@ interface OrderFormProps {
 }
 
 const OrderForm = ({ orderType }: OrderFormProps) => {
-  const { setGlobalLoading, clearLoading } = useGlobalUIStore();
-  const { products, discount, payment, isLoading, isError, orderSubmitMutate } = useOrderData()
-  
+  // The new hook returns isSubmitting separately
+  const { products, discount, payment, isLoading, isError, isSubmitting, orderSubmitMutate } = useOrderData()
+  const router = useRouter();
+
   const methods = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
     mode: 'onChange',
@@ -90,9 +91,9 @@ const OrderForm = ({ orderType }: OrderFormProps) => {
     },
   })
 
-  const { register, handleSubmit, control, formState: { errors, isSubmitting }, setValue } = methods
+  // isSubmitting from react-hook-form is also available, but we'll use the one from react-query
+  const { register, handleSubmit, control, formState: { errors }, setValue } = methods
 
-  // productId를 watch하여 선택된 상품을 동적으로 가져옴
   const watchedProductId = useWatch({
     control,
     name: 'productId',
@@ -104,20 +105,7 @@ const OrderForm = ({ orderType }: OrderFormProps) => {
     setValue('orderType', orderType)
   }, [orderType, setValue])
 
-  useEffect(() => {
-    if (isLoading) {
-      setGlobalLoading(true, '주문 정보를 불러오고 있습니다...')
-    } else {
-      clearLoading()
-    }
-  }, [isLoading, setGlobalLoading, clearLoading])
-
-  // 컴포넌트 언마운트 시 로딩 상태 정리
-  useEffect(() => {
-    return () => {
-      clearLoading()
-    }
-  }, [clearLoading])
+  // All useEffects for loading management have been removed.
 
   const onFormSubmit = async (formValues: OrderFormValues) => {
     console.log('formValues', formValues)
@@ -128,10 +116,8 @@ const OrderForm = ({ orderType }: OrderFormProps) => {
     }
 
     try {
-      // 주문 처리 로딩 시작
-      setGlobalLoading(true, '주문을 처리하고 있습니다...')
+      // Manual loading calls are removed.
 
-      // 최종 payload 구성
       let payload: OrderPayload;
 
       const commonPayload = {
@@ -145,57 +131,38 @@ const OrderForm = ({ orderType }: OrderFormProps) => {
 
       switch (formValues.orderType) {
         case 'G':
-          payload = {
-            ...commonPayload,
-            orderType: 'G',
-            addr: formValues.addr!,
-          };
+          payload = { ...commonPayload, orderType: 'G', addr: formValues.addr! };
           break;
         case 'O':
-          payload = {
-            ...commonPayload,
-            orderType: 'O',
-            addr: formValues.addr!,
-            customsId: formValues.customsId!,
-          };
+          payload = { ...commonPayload, orderType: 'O', addr: formValues.addr!, customsId: formValues.customsId! };
           break;
         case 'E':
-          payload = {
-            ...commonPayload,
-            orderType: 'E',
-          };
+          payload = { ...commonPayload, orderType: 'E' };
           break;
         default:
           throw new Error('알 수 없는 주문 유형입니다.');
       }
 
-      // 백엔드 API 스펙에 맞는 최종 유효성 검사
       const validatedPayload = orderPayloadSchema.parse(payload)
 
-      // 결제 처리 로딩 메시지로 변경
-      setGlobalLoading(true, '결제를 진행하고 있습니다...')
-
-      // mutation을 사용하여 주문 제출
-      orderSubmitMutate(validatedPayload, {
+      // The mutation now receives an object with data and a loading message.
+      orderSubmitMutate({
+        orderData: validatedPayload,
+        loadingMessage: '결제를 진행하고 있습니다...'
+      }, {
         onSuccess: (result) => {
           console.log('주문이 성공적으로 제출되었습니다:', result)
-          setGlobalLoading(true, '주문 완료 처리 중...')
-          
-          setTimeout(() => {
-            clearLoading()
-            alert('주문이 완료되었습니다!')
-            // 성공 시 추가 로직 (예: 성공 페이지로 리디렉션)
-            router.push('/order/complete')
-          }, 1000)
+          alert('주문이 완료되었습니다!')
+          router.push('/order/complete')
         },
         onError: (error) => {
-          clearLoading()
           console.error('주문 제출 실패:', error)
+          // The global loader is cleared automatically by apiClient.
           alert('주문 처리 중 오류가 발생했습니다. 다시 시도해 주세요.')
         },
       })
     } catch (validationError) {
-      clearLoading()
+      // This catch block now only handles client-side validation errors.
       console.error('주문 유효성 검사 실패:', validationError)
       alert('주문 정보가 올바르지 않습니다. 입력 내용을 확인해 주세요.')
     }
@@ -233,4 +200,3 @@ const OrderForm = ({ orderType }: OrderFormProps) => {
 }
 
 export default OrderForm
-

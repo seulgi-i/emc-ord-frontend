@@ -1,12 +1,27 @@
 import { z } from 'zod';
+import { useGlobalUIStore } from '@/lib/stores/globalUIStore';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+// apiClient에 전달될 옵션의 타입을 확장합니다.
+interface ApiClientOptions extends RequestInit {
+  loadingMessage?: string;
+}
+
 async function apiClient<T>(
   endpoint: string,
-  options: RequestInit = {},
+  options: ApiClientOptions = {},
   schema?: z.ZodType<T>
 ): Promise<T> {
+  const { loadingMessage, ...fetchOptions } = options;
+  // Use the new store actions
+  const { showLoader, hideLoader } = useGlobalUIStore.getState();
+
+  // 로딩 메시지가 있으면 로딩 상태를 활성화합니다.
+  if (loadingMessage) {
+    showLoader(loadingMessage);
+  }
+
   const url = `${API_BASE_URL}${endpoint}`;
 
   const defaultOptions: RequestInit = {
@@ -19,18 +34,15 @@ async function apiClient<T>(
 
   const mergedOptions: RequestInit = {
     ...defaultOptions,
-    ...options,
+    ...fetchOptions,
     headers: {
       ...defaultOptions.headers,
-      ...options.headers,
+      ...fetchOptions.headers,
     },
   };
-  console.log("apiclient ==> url", url);
-  console.log("apiclient ==> mergedOptions", mergedOptions);
 
   try {
     const response = await fetch(url, mergedOptions);
-    console.log("apiclient ==> response", response)
 
     if (!response.ok) {
       // 서버에서 보낸 에러 메시지를 포함하여 예외를 던집니다.
@@ -50,13 +62,17 @@ async function apiClient<T>(
       }
       return validationResult.data;
     }
-    console.log("data", data);
 
     return data;
   } catch (error) {
     console.error(`API call to ${endpoint} failed:`, error);
     // 네트워크 에러나 기타 예외를 처리합니다.
     throw error;
+  } finally {
+    // API 호출이 성공하든 실패하든 로딩 상태를 정리합니다.
+    if (loadingMessage) {
+      hideLoader();
+    }
   }
 }
 

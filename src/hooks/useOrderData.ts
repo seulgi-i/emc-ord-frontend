@@ -1,60 +1,36 @@
-import { fetchProducts, fetchDiscount, fetchPayment, submitOrder } from '@/components/features/order/api/orderApi'
+import { fetchOrder, submitOrder } from '@/components/features/order/api/orderApi'
 import { OrderPayload } from '@/components/features/order/order.types'
-import { useGlobalUIStore } from '@/lib/stores/globalUIStore'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
+
+interface SubmitOrderVariables {
+  orderData: OrderPayload;
+  loadingMessage?: string;
+}
 
 const useOrderData = () => {
-  const { setGlobalLoading } = useGlobalUIStore()
-
-  const {
-    data: products,
-    isLoading: isProductsLoading,
-    isError: isProductsError,
+  // 3개의 useQuery를 하나로 통합하고 fetchOrder를 사용합니다.
+  const { 
+    data: initialData, 
+    isLoading, 
+    isError 
   } = useQuery({
-    queryKey: ['products'],
-    queryFn: fetchProducts,
-  })
+    queryKey: ['order', 'initialData'],
+    queryFn: () => fetchOrder({ loadingMessage: '주문 정보를 불러오고 있습니다...' }),
+  });
 
-  const {
-    data: discount,
-    isLoading: isDiscountLoading,
-    isError: isDiscountError,
-  } = useQuery({
-    queryKey: ['discount'],
-    queryFn: fetchDiscount,
-  })
-
-  const {
-    data: payment,
-    isLoading: isPaymentLoading,
-    isError: isPaymentError,
-  } = useQuery({
-    queryKey: ['payment'],
-    queryFn: fetchPayment,
-  })
+  // fetchOrder는 [products, discount, payment] 형태의 배열을 반환합니다.
+  const [products, discount, payment] = initialData || [[], null, null];
 
   const { mutate: orderSubmitMutate, isPending: isSubmitting } = useMutation({
-    mutationFn: (orderData: OrderPayload) => submitOrder(orderData),
+    mutationFn: ({ orderData, loadingMessage = '주문 요청중입니다...' }: SubmitOrderVariables) => 
+      submitOrder(orderData, loadingMessage),
     onSuccess: () => {
-      // 주문 성공 시 관련 쿼리 무효화  또는 다른 로직 처리
       console.log('Order submitted successfully')
-      // 예를 들어 성공 페이지로 리디렉션 할 수 있습니다.
-      // router.push('/order/success');
     },
     onError: (error) => {
       console.error('Order submission failed:', error)
-      // 에러 처리 로직 (예: 사용자에게 알림)
     },
-  })
-
-  const isLoading =
-    isProductsLoading || isDiscountLoading || isPaymentLoading || isSubmitting
-  const isError = isProductsError || isDiscountError || isPaymentError
-
-  useEffect(() => {
-    setGlobalLoading(isLoading)
-  }, [isLoading, setGlobalLoading])
+  });
 
   return {
     products,
@@ -62,8 +38,9 @@ const useOrderData = () => {
     payment,
     isLoading,
     isError,
+    isSubmitting,
     orderSubmitMutate,
   }
 }
 
-export default useOrderData
+export default useOrderData;
