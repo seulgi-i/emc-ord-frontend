@@ -2,10 +2,16 @@ import { create } from 'zustand';
 
 interface GlobalUIState {
   isGlobalLoading: boolean;
-  setGlobalLoading: (isLoading: boolean) => void;
+  loadingMessage?: string;
+  setGlobalLoading: (isLoading: boolean, message?: string) => void;
+  clearLoading: () => void;
 }
 
 export const useGlobalUIStore = create<GlobalUIState>((set) => ({
   isGlobalLoading: false,
-  setGlobalLoading: (isLoading: boolean) => set({ isGlobalLoading: isLoading }),
+  loadingMessage: undefined,
+  setGlobalLoading: (isLoading: boolean, message?: string) => 
+    set({ isGlobalLoading: isLoading, loadingMessage: message }),
+  clearLoading: () => 
+    set({ isGlobalLoading: false, loadingMessage: undefined }),
 }));

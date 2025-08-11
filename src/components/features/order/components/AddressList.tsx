@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Address } from '@/lib/schemas/address.schemas';
 import useAddresses from '@/hooks/useAddresses';
-import AddressFormModal from './AddressFormModal';
+import { Address } from '@/lib/schemas/address.schemas';
+import React, { useState } from 'react';
 import AddressEditModal from './AddressEditModal';
 
 interface AddressListProps {
@@ -57,7 +56,7 @@ const AddressList: React.FC<AddressListProps> = ({
   };
 
   if (isLoading) {
-    return <div className="flex justify-center p-8">로딩 중...</div>;
+    return
   }
 
   if (isError) {

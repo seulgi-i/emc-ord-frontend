@@ -3,8 +3,9 @@
 import { useGlobalUIStore } from "@/lib/stores/globalUIStore";
 import React from 'react';
 
-const GlobalLoadingIndicator = () => {
-  const { isGlobalLoading } = useGlobalUIStore();
+const GlobalLoadingIndicator: React.FC = () => {
+  const { isGlobalLoading, loadingMessage } = useGlobalUIStore();
+  
   if (!isGlobalLoading) return null;
 
   return (
@@ -22,7 +23,7 @@ const GlobalLoadingIndicator = () => {
       fontSize: '2rem',
       zIndex: 9999,
     }}>
-      로딩 중...
+      <span>{loadingMessage || '로딩 중...'}</span>
     </div>
   );
 };

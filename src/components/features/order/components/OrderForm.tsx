@@ -13,6 +13,7 @@ import AddressListModal from './AddressListModal' // Import the new modal
 import ProductInfo from './ProductInfo'
 import DiscountInfo from './DiscountInfo'
 import PaymentInfo from './PaymentInfo'
+import { useGlobalUIStore } from '@/lib/stores/globalUIStore'
 
 interface FormComponentProps {
   register: UseFormRegister<OrderFormValues>
@@ -71,6 +72,7 @@ interface OrderFormProps {
 }
 
 const OrderForm = ({ orderType }: OrderFormProps) => {
+  const { setGlobalLoading, clearLoading } = useGlobalUIStore();
   const { products, discount, payment, isLoading, isError, orderSubmitMutate } = useOrderData()
   
   const methods = useForm<OrderFormValues>({
@@ -102,6 +104,21 @@ const OrderForm = ({ orderType }: OrderFormProps) => {
     setValue('orderType', orderType)
   }, [orderType, setValue])
 
+  useEffect(() => {
+    if (isLoading) {
+      setGlobalLoading(true, '주문 정보를 불러오고 있습니다...')
+    } else {
+      clearLoading()
+    }
+  }, [isLoading, setGlobalLoading, clearLoading])
+
+  // 컴포넌트 언마운트 시 로딩 상태 정리
+  useEffect(() => {
+    return () => {
+      clearLoading()
+    }
+  }, [clearLoading])
+
   const onFormSubmit = async (formValues: OrderFormValues) => {
     console.log('formValues', formValues)
 
@@ -111,6 +128,9 @@ const OrderForm = ({ orderType }: OrderFormProps) => {
     }
 
     try {
+      // 주문 처리 로딩 시작
+      setGlobalLoading(true, '주문을 처리하고 있습니다...')
+
       // 최종 payload 구성
       let payload: OrderPayload;
 
@@ -152,26 +172,36 @@ const OrderForm = ({ orderType }: OrderFormProps) => {
       // 백엔드 API 스펙에 맞는 최종 유효성 검사
       const validatedPayload = orderPayloadSchema.parse(payload)
 
+      // 결제 처리 로딩 메시지로 변경
+      setGlobalLoading(true, '결제를 진행하고 있습니다...')
+
       // mutation을 사용하여 주문 제출
       orderSubmitMutate(validatedPayload, {
         onSuccess: (result) => {
           console.log('주문이 성공적으로 제출되었습니다:', result)
-          alert('주문이 완료되었습니다!')
-          // 성공 시 추가 로직 (예: 성공 페이지로 리디렉션)
-          router.push('/order/complete')
+          setGlobalLoading(true, '주문 완료 처리 중...')
+          
+          setTimeout(() => {
+            clearLoading()
+            alert('주문이 완료되었습니다!')
+            // 성공 시 추가 로직 (예: 성공 페이지로 리디렉션)
+            router.push('/order/complete')
+          }, 1000)
         },
         onError: (error) => {
+          clearLoading()
           console.error('주문 제출 실패:', error)
           alert('주문 처리 중 오류가 발생했습니다. 다시 시도해 주세요.')
         },
       })
     } catch (validationError) {
+      clearLoading()
       console.error('주문 유효성 검사 실패:', validationError)
       alert('주문 정보가 올바르지 않습니다. 입력 내용을 확인해 주세요.')
     }
   }
 
-  if (isLoading) return 
+  if (isLoading) return null
   if (isError) return <div className="text-red-500 text-center p-8">에러가 발생했습니다.</div>
 
   return (
