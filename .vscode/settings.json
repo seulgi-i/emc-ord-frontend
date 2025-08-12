@@ -1,13 +1,93 @@
 {
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  // 파일과 폴더를 제외하기 위한 GLOB 패턴을 구성합니다.
+	"files.exclude": {
+		".*": false,
+		"**/.DS_Store": true,
+		"**/.git": false,
+		"**/.idea": true,
+		"**/.svn": true,
+		"**/.yarn": true,
+		"**/node_modules": true,
+	},
+
+  // 검색에서 파일 및 폴더를 제외하도록 GLOB 패턴을 구성합니다. files.exclude 설정에서 모든 GLOB 패턴을 상속합니다.
+	"search.exclude": {
+		"**/.DS_Store": true,
+		"**/.git": true,
+		"**/.yarn": true,
+		"**/*.xcodeproj": true,
+		"**/*.xcworkspace": true,
+		"**/bower_components": true,
+		"**/build": true,
+		"**/coverage": true,
+		"**/node_modules": false,
+		"**/Pods": true,
+		"**/tmp": true
+	},
+  "emmet.syntaxProfiles": {
+		"javascriptreact": "jsx",
+		"javascript": "jsx",
+		"xml": {
+			"attr_quotes": "single"
+		}
+	},
+  "emmet.triggerExpansionOnTab": true,
+	"emmet.includeLanguages": {
+		"javascript": "javascriptreact"
+	},
+	"git.autofetch": true,
+	"javascript.updateImportsOnFileMove.enabled": "always",
+	"explorer.confirmDelete": false,
+	"autoimport.filesToScan": "**/*.{ts,tsx,vue,mdx,md}",
+	"typescript.updateImportsOnFileMove.enabled": "always",
+	"typescript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
+	"typescript.locale": "ko",
+	"typescript.preferences.quoteStyle": "single",
+	"javascript.format.enable": false,
+	// Set the default
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit",
+		"source.organizeImports": "explicit"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+	"prettier.enable": true,
+	// Enable per-language
+	"[javascript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+	"editor.linkedEditing": true,
+	"editor.suggestSelection": "first",
+	"eslint.lintTask.enable": true,
+	"eslint.run": "onSave",
+	"eslint.validate": [
+		// "markdown",
+		// "mdx",
+		"javascript",
+		"javascriptreact",
+		"typescript",
+		"typescriptreact"
+	],
+	"auto-rename-tag.activationOnLanguage": [
+		"html",
+		"javascript",
+		"javascriptreact",
+		"markdown",
+		"mdx",
+		"plaintext",
+		"typescript",
+		"typescriptreact",
+		"xml"
+	],
+	"typescript.inlayHints.parameterNames.enabled": "all",
+	"typescript.preferences.importModuleSpecifier": "non-relative"
 }

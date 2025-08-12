@@ -1,27 +1,49 @@
 {
+  "extends": "./tsconfig.paths.json", // 경로 별도 관리 가능 (없으면 제거)
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    /* ==== 최신 JS 타겟 ==== */
+    "target": "ES2022", // 최신 JS 기능
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+
+    /* ==== 안정성과 호환성 ==== */
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "noEmit": true,
+    "noImplicitAny": true, // any 방지
+    "forceConsistentCasingInFileNames": true, // 대소문자 불일치 방지
+
+    /* ==== 빌드 설정 ==== */
+    "noEmit": true, // TS만 검사하고 JS 출력 안 함
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "bundler", // 최신 Next 권장 방식
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
     "incremental": true,
+    "baseUrl": "./", // 절대 경로 import 지원
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    /* ==== JSX 설정 ==== */
+    "jsx": "preserve",
+    
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next.config.mjs",
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "scripts/*",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "./public/scripts/*.js"
+  ]
 }

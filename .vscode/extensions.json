@@ -1,0 +1,18 @@
+{
+	"recommendations": [
+		"igorming.useful-react-snippets",
+		"dsznajder.es7-react-js-snippets",
+		"esbenp.prettier-vscode",
+		"christian-kohler.path-intellisense",
+		"davidanson.vscode-markdownlint",
+		"dbaeumer.vscode-eslint",
+		"mikestead.dotenv",
+		"pmneo.tsimporter",
+		"gregorbiswanger.json2ts",
+		"stringham.move-ts",
+		"unifiedjs.vscode-mdx",
+		"paulmolluzzo.convert-css-in-js",
+		"formulahendry.auto-rename-tag",
+		"steoates.autoimport"
+	]
+}

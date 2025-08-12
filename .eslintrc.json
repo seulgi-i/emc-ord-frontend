@@ -1,0 +1,102 @@
+// "off" 또는 0 : 끔
+// "warn" 또는 1 : 경고
+// "error" 또는 2 : 오류
+
+{
+	"root": true,
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"project": "./tsconfig.json",
+		"sourceType": "module",
+		"ecmaFeatures": {
+			"jsx": true
+		}
+	},
+	"env": {
+		"node": true,
+		"browser": true
+	},
+	"plugins": ["@typescript-eslint", "prettier", "unused-imports"],
+	"extends": [
+		"next/core-web-vitals",
+    	"plugin:@typescript-eslint/recommended",
+    	"plugin:prettier/recommended"
+	],
+	"rules": {
+		"no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1, "maxBOF": 0 }],
+		"class-methods-use-this": "off",
+		"no-empty-pattern": "warn",
+		"no-unused-vars": "off",
+		"unused-imports/no-unused-vars": [
+			"error",
+			{
+				"args": "after-used",
+				"argsIgnorePattern": "^_",
+				"ignoreRestSiblings": true,
+				"vars": "all",
+				"varsIgnorePattern": "^_"
+			}
+		],
+		"unused-imports/no-unused-imports": "error",
+		"@typescript-eslint/no-unused-vars": "off",
+		"react/react-in-jsx-scope": "off",
+		"react/jsx-filename-extension": [1, { "extensions": [".ts", ".tsx"] }],
+		"react/function-component-definition": [2, { "namedComponents": "arrow-function" }],
+		"react/jsx-props-no-spreading": [1, { "custom": "ignore" }],
+		"react/jsx-key": [2, { "checkKeyMustBeforeSpread": true }],
+		"react/require-default-props": "off",
+		"react/state-in-constructor": ["error", "never"],
+		"import/prefer-default-export": "off",
+		"import/no-extraneous-dependencies": [
+			"error",
+			{
+				"devDependencies": ["scripts/**/*"]
+			}
+		],
+		"prefer-promise-reject-errors": "off",
+		"@typescript-eslint/no-use-before-define": "warn"
+	},
+	"overrides": [
+		{
+			"files": ["./src/lib/modal/Modal.tsx"],
+			"rules": {
+				"react/destructuring-assignment": "off"
+			}
+		},
+		{
+			"files": ["./@types/*.d.ts"],
+			"rules": {
+				"@typescript-eslint/no-implicit-any": "off"
+			}
+		},
+		{
+			"files": ["./src/queries/fetch/interceptors.ts"],
+			"rules": {
+				"no-param-reassign": "off"
+			}
+		},
+		{
+			"files": ["./src/pages/**/*.tsx"],
+			"rules": {
+				"react/function-component-definition": [
+					"error",
+					{
+						"namedComponents": ["function-declaration", "arrow-function"]
+					}
+				]
+			}
+		},
+		{
+			"files": ["./next.config.mjs"],
+			"rules": {
+				"no-param-reassign": "off"
+			}
+		},
+		{
+			"files": ["@types/*.d.ts"],
+			"rules": {
+				"@typescript-eslint/no-empty-interface": "off"
+			}
+		}
+	]
+}
